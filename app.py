@@ -3,8 +3,9 @@ import json
 from dateutil import parser
 from datetime import datetime
 import pytz
+import sys
 
-HEADERS = {'PRIVATE-TOKEN': '23Yj3vfbTCsUrtRtfWLV'}
+HEADERS = {'PRIVATE-TOKEN': sys.argv[1]}
 
 response_raw = requests.get(
     'http://git.spine2.ncrs.nhs.uk/api/v4/groups/304/merge_requests?&state=opened&scope=all', headers=HEADERS)
