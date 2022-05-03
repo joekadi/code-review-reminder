@@ -1,5 +1,3 @@
-import requests
-import json
 from datetime import datetime
 import pytz
 import sys
@@ -102,53 +100,50 @@ need_two_reviewers_author_table = create_author_table(
     sort_dict_by_value(
         need_two_reviewers['authors']))
 
-# need_two_reviewers_issue = lambdas.issues.get(3, lazy=True) #this is the REAL issue
 need_two_reviewers_issue = lambdas.issues.get(
-    7, lazy=True)  # this is the FAKE issue
+    3, lazy=True)  # this is the REAL issue
+# need_two_reviewers_issue = lambdas.issues.get(
+#     7, lazy=True)  # this is the FAKE issue
 
 need_two_reviewers_issue.title = "Open MR's that need 2 reviewers and < 3 months old"
-need_two_reviewers_issue.description = "<h3>Total MR's: " + str(len(need_two_reviewers['merge_requests'])) + "</h3>" + "<h3>MR's marked as WIP have been excluded from the list<h3>" + need_two_reviewers_author_table + \
+need_two_reviewers_issue.description = "<h3>Total MR's: " + str(len(need_two_reviewers['merge_requests'])) + "</h3>" + "<h3>MR's marked as WIP have been excluded from this list<h3>" + need_two_reviewers_author_table + \
     need_two_reviewers_table
 need_two_reviewers_issue.save()
 
+# Need one reviewer
+need_one_reviewer_table = create_mr_table(
+    need_one_reviewer['merge_requests'])
+need_one_reviewer_author_table = create_author_table(
+    sort_dict_by_value(
+        need_one_reviewer['authors']))
+need_one_reviewer_issue = lambdas.issues.get(4, lazy=True)
+need_one_reviewer_issue.title = "Open MR's that need 1 reviewer and < 3 months old"
+need_one_reviewer_issue.description = '<h3>Total merge requests: ' + str(len(need_one_reviewer['merge_requests'])) + '</h3>' + "<h3>MR's marked as WIP have been excluded from this list<h3>" + need_one_reviewer_author_table + \
+    need_one_reviewer_table
+need_one_reviewer_issue.save()
 
-# Uncomment below for real deal
-
-
-# # Need one reviewer
-# need_one_reviewer_table = create_mr_table(
-#     need_one_reviewer['merge_requests'])
-# need_one_reviewer_author_table = create_author_table(
-#     sort_dict_by_value(
-#         need_one_reviewer['authors']))
-# need_one_reviewer_issue = lambdas.issues.get(4, lazy=True)
-# need_one_reviewer_issue.title = "Open MR's that need 1 reviewer and younger than 3 months"
-# need_one_reviewer_issue.description = '<h3>Total merge requests: ' + str(len(need_one_reviewer['merge_requests'])) + '</h3>' + need_one_reviewer_author_table + \
-#     need_one_reviewer_table
-# need_one_reviewer_issue.save()
-
-# # Ready to merge
-# ready_to_merge_table = create_mr_table(
-#     ready_to_merge['merge_requests'])
-# ready_to_merge_author_table = create_author_table(
-#     sort_dict_by_value(ready_to_merge['authors']))
-# ready_to_merge_issue = lambdas.issues.get(5, lazy=True)
-# ready_to_merge_issue.title = "Open MR's that are ready to merge and younger than 3 months"
-# ready_to_merge_issue.description = '<h3>Total merge requests: ' + \
-#     str(len(ready_to_merge['merge_requests'])) + '</h3>' + \
-#     ready_to_merge_author_table + ready_to_merge_table
-# ready_to_merge_issue.save()
+# Ready to merge
+ready_to_merge_table = create_mr_table(
+    ready_to_merge['merge_requests'])
+ready_to_merge_author_table = create_author_table(
+    sort_dict_by_value(ready_to_merge['authors']))
+ready_to_merge_issue = lambdas.issues.get(5, lazy=True)
+ready_to_merge_issue.title = "Open MR's that are ready to merge and < 3 months old"
+ready_to_merge_issue.description = '<h3>Total merge requests: ' + \
+    str(len(ready_to_merge['merge_requests'])) + '</h3>' + "<h3>MR's marked as WIP have been excluded from this list<h3>" + \
+    ready_to_merge_author_table + ready_to_merge_table
+ready_to_merge_issue.save()
 
 
-# # Older than 3 months
-# older_than_3_months_table = create_mr_table(
-#     older_than_3_months['merge_requests'])
-# older_than_3_months_author_table = create_author_table(
-#     sort_dict_by_value(
-#         older_than_3_months['authors']))
-# older_than_3_months_issue = lambdas.issues.get(6, lazy=True)
-# older_than_3_months_issue.title = "Open MR's that are older than 3 months"
-# older_than_3_months_issue.description = '<h3>Total merge requests: ' + \
-#     str(len(older_than_3_months['merge_requests'])) + '</h3>' + older_than_3_months_author_table + \
-#     older_than_3_months_table
-# older_than_3_months_issue.save()
+# Older than 3 months
+older_than_3_months_table = create_mr_table(
+    older_than_3_months['merge_requests'])
+older_than_3_months_author_table = create_author_table(
+    sort_dict_by_value(
+        older_than_3_months['authors']))
+older_than_3_months_issue = lambdas.issues.get(6, lazy=True)
+older_than_3_months_issue.title = "Open MR's that are > 3 months old"
+older_than_3_months_issue.description = '<h3>Total merge requests: ' + \
+    str(len(older_than_3_months['merge_requests'])) + '</h3>' + \
+    older_than_3_months_author_table + older_than_3_months_table
+older_than_3_months_issue.save()
