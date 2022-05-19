@@ -1,0 +1,2 @@
+class MergeRequestRetrievalError(Exception):
+    pass
