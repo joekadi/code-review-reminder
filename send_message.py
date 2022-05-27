@@ -1,3 +1,4 @@
+from uuid import uuid4
 import requests
 import json
 
@@ -279,98 +280,166 @@ WIP_BLOCKS = [
 
 BLOCKS = [
 
-    {
-        "type": "header",
-        "text": {
-            "type": "plain_text",
-            "text": "Open merge requests that need addressed",
-            "emoji": True
-        }
-    },
-    {
-        "type": "context",
-        "elements": [
-            {
-                "type": "plain_text",
-                "text": "Click through to view each list",
-                "emoji": True
-            }
-        ]
-    },
-    {
-        "type": "actions",
-        "elements": [
-                {
-                    "type": "button",
-                    "text": {
-                        "type": "plain_text",
-                        "text": "DEFAULT TEXT",
-                        "emoji": True
-                    },
-                    "value": "click_me_123",
-                    "url": "https://google.com",
-                    "action_id": "actionId-0"
-                }
-        ]
-    },
-    {
-        "type": "divider"
-    },
-    {
-        "type": "actions",
-        "elements": [
-            {
-                "type": "button",
-                "text": {
-                    "type": "plain_text",
-                    "text": "DEFAULT TEXT",
-                    "emoji": True
-                },
-                "value": "click_me_123",
-                "url": "https://google.com",
-                "action_id": "actionId-0"
-            }
-        ]
-    },
-    {
-        "type": "divider"
-    },
-    {
-        "type": "actions",
-        "elements": [
-            {
-                "type": "button",
-                "text": {
-                    "type": "plain_text",
-                    "text": "DEFAULT TEXT",
-                    "emoji": True
-                },
-                "value": "click_me_123",
-                "url": "https://google.com",
-                "action_id": "actionId-0"
-            }
-        ]
-    },
-    {
-        "type": "divider"
-    },
-    {
-        "type": "actions",
-        "elements": [
-            {
-                "type": "button",
-                "text": {
-                    "type": "plain_text",
-                    "text": "DEFAULT TEXT",
-                    "emoji": True
-                },
-                "value": "click_me_123",
-                "url": "https://google.com",
-                "action_id": "actionId-0"
-            }
-        ]
-    },
+        {
+			"type": "header",
+			"text": {
+				"type": "plain_text",
+				"text": "Open merge requests that need addressed",
+				"emoji": True
+			}
+		},
+		{
+			"type": "context",
+			"elements": [
+				{
+					"type": "plain_text",
+					"text": "Click through to view each list",
+					"emoji": True
+				}
+			]
+		},
+		{
+			"type": "actions",
+			"elements": [
+				{
+					"type": "button",
+					"text": {
+						"type": "plain_text",
+						"text": "DEFAULT TEXT",
+						"emoji": True
+					},
+					"value": "click_me_123",
+					"url": "https://google.com",
+					"action_id": "actionId-0"
+				}
+			]
+		},
+		{
+			"type": "context",
+			"elements": [
+				{
+					"type": "plain_text",
+					"text": "Oldest was created at random date",
+					"emoji": True
+				}
+			]
+		},
+        # {
+		# 	"type": "section",
+		# 	"text": {
+		# 		"type": "mrkdwn",
+		# 		"text": "*Authors - MR's:*"
+		# 	},
+		# 	"accessory": {
+		# 		"type": "checkboxes",
+		# 		"options": [
+				
+		# 		],
+		# 		"action_id": "checkboxes-action"
+		# 	}
+        # },
+		{
+			"type": "divider"
+		},
+		{
+			"type": "actions",
+			"elements": [
+				{
+					"type": "button",
+					"text": {
+						"type": "plain_text",
+						"text": "DEFAULT TEXT",
+						"emoji": True
+					},
+					"value": "click_me_123",
+					"url": "https://google.com",
+					"action_id": "actionId-0"
+				}
+			]
+		},
+		{
+			"type": "context",
+			"elements": [
+				{
+					"type": "plain_text",
+					"text": "Oldest was created at random date",
+					"emoji": True
+				}
+			]
+		},
+		{
+			"type": "divider"
+		},
+		{
+			"type": "actions",
+			"elements": [
+				{
+					"type": "button",
+					"text": {
+						"type": "plain_text",
+						"text": "DEFAULT TEXT",
+						"emoji": True
+					},
+					"value": "click_me_123",
+					"url": "https://google.com",
+					"action_id": "actionId-0"
+				}
+			]
+		},
+		{
+			"type": "context",
+			"elements": [
+				{
+					"type": "plain_text",
+					"text": "Oldest was created at random date",
+					"emoji": True
+				}
+			]
+		},
+		{
+			"type": "divider"
+		},
+		{
+			"type": "actions",
+			"elements": [
+				{
+					"type": "button",
+					"text": {
+						"type": "plain_text",
+						"text": "DEFAULT TEXT",
+						"emoji": True
+					},
+					"value": "click_me_123",
+					"url": "https://google.com",
+					"action_id": "actionId-0"
+				}
+			]
+		},
+        {
+			"type": "context",
+			"elements": [
+				{
+					"type": "plain_text",
+					"text": "Oldest was created at random date",
+					"emoji": True
+				}
+			]
+		}
 ]
+
+
+def add_authors_checklist(authors):
+     for author, count in authors.items():
+        entry = {
+						"text": {
+							"type": "mrkdwn",
+							"text": f"{author} - {count}"
+						},
+						"value": f"value{uuid4()}"
+			}
+            
+        BLOCKS[4]['accessory']['options'].append(entry)
+
 
 
 def notify_slack_channel(webhook_url, lists_of_merge_requests, issue_urls):
@@ -381,16 +450,24 @@ def notify_slack_channel(webhook_url, lists_of_merge_requests, issue_urls):
     BLOCKS[0]['text']['text'] = f'{total_open_mrs} open non-WIP merge requests that need addressed'
     BLOCKS[2]['elements'][0]['text'][
         'text'] = f"{len(lists_of_merge_requests['ready_to_merge']['merge_requests'])} ready to merge :100:"
-    BLOCKS[4]['elements'][0]['text'][
+    BLOCKS[5]['elements'][0]['text'][
         'text'] = f"{len(lists_of_merge_requests['need_one_reviewer']['merge_requests'])} need one reviewer :eyes: "
-    BLOCKS[6]['elements'][0]['text'][
+    BLOCKS[8]['elements'][0]['text'][
         'text'] = f"{len(lists_of_merge_requests['need_two_reviewers']['merge_requests'])} need two reviewers :eyes::eyes:"
-    BLOCKS[8]['elements'][0]['text']['text'] = f"{len(lists_of_merge_requests['older_than_3_months']['merge_requests'])} > three months old :axe:"
+    BLOCKS[11]['elements'][0]['text']['text'] = f"{len(lists_of_merge_requests['older_than_3_months']['merge_requests'])} > three months old :axe:"
 
     BLOCKS[2]['elements'][0]['url'] = issue_urls['ready_to_merge']
-    BLOCKS[4]['elements'][0]['url'] = issue_urls['need_one_reviewer']
-    BLOCKS[6]['elements'][0]['url'] = issue_urls['need_two_reviewers']
-    BLOCKS[8]['elements'][0]['url'] = issue_urls['older_than_3_months']
+    BLOCKS[5]['elements'][0]['url'] = issue_urls['need_one_reviewer']
+    BLOCKS[8]['elements'][0]['url'] = issue_urls['need_two_reviewers']
+    BLOCKS[11]['elements'][0]['url'] = issue_urls['older_than_3_months']
+
+
+    BLOCKS[3]['elements'][0]['text'] = f"Oldest created at {lists_of_merge_requests['ready_to_merge']['oldest_merge_request'].created_at.strftime('%B %d, %Y')}"
+    BLOCKS[6]['elements'][0]['text'] = f"Oldest created at {lists_of_merge_requests['need_one_reviewer']['oldest_merge_request'].created_at.strftime('%B %d, %Y')}"
+    BLOCKS[9]['elements'][0]['text'] = f"Oldest created at {lists_of_merge_requests['need_two_reviewers']['oldest_merge_request'].created_at.strftime('%B %d, %Y')}"
+    BLOCKS[12]['elements'][0]['text'] = f"Oldest created at {lists_of_merge_requests['older_than_3_months']['oldest_merge_request'].created_at.strftime('%B %d, %Y')}"
+
+    #add_authors_checklist(lists_of_merge_requests['ready_to_merge']['authors'])
 
     message_data = {
         "blocks": BLOCKS,

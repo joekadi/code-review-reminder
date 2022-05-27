@@ -8,17 +8,9 @@ from send_message import notify_slack_channel
 from exceptions import MergeRequestRetrievalError
 import logging
 
-
 class Service:
     GL_URL = None
     gitlab_url = None
-
-    def get_body_attr(self, key: str, required=True):
-        key = key.lower()
-        if required and (key not in self.body):
-            raise KeyError('Event body does not contain '
-                           f'required attribute `{key}`.')
-        return self.body.get(key)
 
     def sort_dict_by_value(self, d):
         return dict(sorted(d.items(), key=lambda x: x[1], reverse=True))
@@ -46,7 +38,7 @@ class Service:
         html_table += '</table>'
         return html_table
 
-    def lambda_handler(self, gitlab_url, access_token, webhook_url):
+    def run(self, gitlab_url, access_token, webhook_url):
         try:
             self.gitlab_url = gitlab_url
             self.GL_URL = gitlab.Gitlab(url=gitlab_url,
@@ -56,14 +48,21 @@ class Service:
         except Exception as e:
             raise(f"Error connecting to Gitlab: {e}")
 
-        ready_to_merge = {'merge_requests': [], 'authors': {}}
-        older_than_3_months = {'merge_requests': [], 'authors': {}}
-        need_one_reviewer = {'merge_requests': [], 'authors': {}}
-        need_two_reviewers = {'merge_requests': [], 'authors': {}}
+        ready_to_merge = {'merge_requests': [], 'authors': {}, 'oldest_merge_request': None}
+        older_than_3_months = {'merge_requests': [], 'authors': {}, 'oldest_merge_request': None}
+        need_one_reviewer = {'merge_requests': [], 'authors': {}, 'oldest_merge_request': None}
+        need_two_reviewers = {'merge_requests': [], 'authors': {}, 'oldest_merge_request': None}
 
+       
         try:
             mrs = group.mergerequests.list(
                 state='opened', scope="all", all=True)
+
+            ready_to_merge['oldest_merge_request'] = mrs[0]
+            need_one_reviewer['oldest_merge_request'] = mrs[0]
+            need_two_reviewers['oldest_merge_request'] = mrs[0]
+            older_than_3_months['oldest_merge_request'] = mrs[0]
+
             for merge_request in mrs:
                 author = "<a href=" + \
                     merge_request.author['web_url']+">" + \
@@ -72,7 +71,10 @@ class Service:
                 time_between_insertion = datetime.utcnow().replace(
                     tzinfo=pytz.utc) - merge_request.created_at
 
+            
                 if(time_between_insertion.days > 90):
+                    if merge_request.created_at < older_than_3_months['oldest_merge_request'].created_at:
+                        older_than_3_months['oldest_merge_request'] = merge_request
                     older_than_3_months['merge_requests'].append(merge_request)
                     if author in older_than_3_months['authors']:
                         older_than_3_months['authors'][author] += 1
@@ -82,8 +84,10 @@ class Service:
 
                 if merge_request.work_in_progress == True:
                     continue
-
+                
                 if merge_request.upvotes == 0:
+                    if merge_request.created_at < need_two_reviewers['oldest_merge_request'].created_at:
+                        need_two_reviewers['oldest_merge_request'] = merge_request
                     need_two_reviewers['merge_requests'].append(merge_request)
                     if author in need_two_reviewers['authors']:
                         need_two_reviewers['authors'][author] += 1
@@ -91,6 +95,8 @@ class Service:
                         need_two_reviewers['authors'][author] = 1
 
                 if merge_request.upvotes == 1:
+                    if merge_request.created_at < need_one_reviewer['oldest_merge_request'].created_at:
+                        need_one_reviewer['oldest_merge_request'] = merge_request
                     need_one_reviewer['merge_requests'].append(merge_request)
                     if author in need_one_reviewer['authors']:
                         need_one_reviewer['authors'][author] += 1
@@ -98,6 +104,8 @@ class Service:
                         need_one_reviewer['authors'][author] = 1
 
                 if merge_request.upvotes >= 2:
+                    if merge_request.created_at < ready_to_merge['oldest_merge_request'].created_at:
+                        ready_to_merge['oldest_merge_request'] = merge_request
                     ready_to_merge['merge_requests'].append(merge_request)
                     if author in ready_to_merge['authors']:
                         ready_to_merge['authors'][author] += 1
@@ -168,7 +176,6 @@ class Service:
 
         notify_slack_channel(webhook_url, lists_of_merge_requests, issue_urls)
 
-
 if __name__ == '__main__':
     LOG = logging.getLogger().setLevel(logging.INFO)
 
@@ -190,4 +197,7 @@ if __name__ == '__main__':
         raise ValueError("No webhook URL given")
 
     service = Service()
-    service.lambda_handler(gitlab_url, access_token, webhook_url)
+    service.run(gitlab_url, access_token, webhook_url)
+
+
+[{'type': 'header', 'text': {'type': 'plain_text', 'text': '66 open non-WIP merge requests that need addressed', 'emoji': True}}, {'type': 'context', 'elements': [{'type': 'plain_text', 'text': 'Click through to view each list', 'emoji': True}]}, {'type': 'actions', 'elements': [{'type': 'button', 'text': {'type': 'plain_text', 'text': '6 ready to merge :100:', 'emoji': True}, 'value': 'click_me_123', 'url': 'http://git.spine2.ncrs.nhs.uk/cid/lambdas/-/issues/5', 'action_id': 'actionId-0'}]}, {'type': 'context', 'elements': [{'type': 'plain_text', 'text': 'Oldest created at April 10, 2022', 'emoji': True}]}, None, {'type': 'divider'}, {'type': 'actions', 'elements': [{'type': 'button', 'text': {'type': 'plain_text', 'text': '5 need one reviewer :eyes: ', 'emoji': True}, 'value': 'click_me_123', 'url': 'http://git.spine2.ncrs.nhs.uk/cid/lambdas/-/issues/4', 'action_id': 'actionId-0'}]}, {'type': 'context', 'elements': [{'type': 'plain_text', 'text': 'Oldest created at March 02, 2022', 'emoji': True}]}, {'type': 'divider'}, {'type': 'actions', 'elements': [{'type': 'button', 'text': {'type': 'plain_text', 'text': '10 need two reviewers :eyes::eyes:', 'emoji': True}, 'value': 'click_me_123', 'url': 'http://git.spine2.ncrs.nhs.uk/cid/lambdas/-/issues/3', 'action_id': 'actionId-0'}]}, {'type': 'context', 'elements': [{'type': 'plain_text', 'text': 'Oldest created at March 10, 2022', 'emoji': True}]}, {'type': 'divider'}, {'type': 'actions', 'elements': [{'type': 'button', 'text': {'type': 'plain_text', 'text': '45 > three months old :axe:', 'emoji': True}, 'value': 'click_me_123', 'url': 'http://git.spine2.ncrs.nhs.uk/cid/lambdas/-/issues/6', 'action_id': 'actionId-0'}]}, {'type': 'context', 'elements': [{'type': 'plain_text', 'text': 'Oldest created at November 15, 2019', 'emoji': True}]}]
