@@ -2,7 +2,6 @@ from uuid import uuid4
 import requests
 import json
 
-
 WIP_BLOCKS = [
     {
         "type": "header",

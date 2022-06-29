@@ -8,6 +8,8 @@ from send_message import notify_slack_channel
 from exceptions import MergeRequestRetrievalError
 import logging
 
+SEND_MESSAGE = True
+
 class Service:
     GL_URL = None
     gitlab_url = None
@@ -173,8 +175,8 @@ class Service:
 
         lists_of_merge_requests = {'ready_to_merge': ready_to_merge, 'older_than_3_months': older_than_3_months,
                                    'need_one_reviewer': need_one_reviewer, 'need_two_reviewers': need_two_reviewers}
-
-        notify_slack_channel(webhook_url, lists_of_merge_requests, issue_urls)
+        if SEND_MESSAGE:
+            notify_slack_channel(webhook_url, lists_of_merge_requests, issue_urls)
 
 if __name__ == '__main__':
     LOG = logging.getLogger().setLevel(logging.INFO)
@@ -198,6 +200,3 @@ if __name__ == '__main__':
 
     service = Service()
     service.run(gitlab_url, access_token, webhook_url)
-
-
-[{'type': 'header', 'text': {'type': 'plain_text', 'text': '66 open non-WIP merge requests that need addressed', 'emoji': True}}, {'type': 'context', 'elements': [{'type': 'plain_text', 'text': 'Click through to view each list', 'emoji': True}]}, {'type': 'actions', 'elements': [{'type': 'button', 'text': {'type': 'plain_text', 'text': '6 ready to merge :100:', 'emoji': True}, 'value': 'click_me_123', 'url': 'http://git.spine2.ncrs.nhs.uk/cid/lambdas/-/issues/5', 'action_id': 'actionId-0'}]}, {'type': 'context', 'elements': [{'type': 'plain_text', 'text': 'Oldest created at April 10, 2022', 'emoji': True}]}, None, {'type': 'divider'}, {'type': 'actions', 'elements': [{'type': 'button', 'text': {'type': 'plain_text', 'text': '5 need one reviewer :eyes: ', 'emoji': True}, 'value': 'click_me_123', 'url': 'http://git.spine2.ncrs.nhs.uk/cid/lambdas/-/issues/4', 'action_id': 'actionId-0'}]}, {'type': 'context', 'elements': [{'type': 'plain_text', 'text': 'Oldest created at March 02, 2022', 'emoji': True}]}, {'type': 'divider'}, {'type': 'actions', 'elements': [{'type': 'button', 'text': {'type': 'plain_text', 'text': '10 need two reviewers :eyes::eyes:', 'emoji': True}, 'value': 'click_me_123', 'url': 'http://git.spine2.ncrs.nhs.uk/cid/lambdas/-/issues/3', 'action_id': 'actionId-0'}]}, {'type': 'context', 'elements': [{'type': 'plain_text', 'text': 'Oldest created at March 10, 2022', 'emoji': True}]}, {'type': 'divider'}, {'type': 'actions', 'elements': [{'type': 'button', 'text': {'type': 'plain_text', 'text': '45 > three months old :axe:', 'emoji': True}, 'value': 'click_me_123', 'url': 'http://git.spine2.ncrs.nhs.uk/cid/lambdas/-/issues/6', 'action_id': 'actionId-0'}]}, {'type': 'context', 'elements': [{'type': 'plain_text', 'text': 'Oldest created at November 15, 2019', 'emoji': True}]}]
