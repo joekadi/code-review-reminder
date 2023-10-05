@@ -1,4 +1,4 @@
-# Code Review Reminder Bot
+# Code Review Reminder Script
 
 - Grabs open MR's from GitLab repo
 - Sorts into 4 issues categorised by age and no. of required approvals
